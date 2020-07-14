@@ -57,7 +57,7 @@ def CreateIndex(Nd,Param,db="azure"):
       CypherBoltQuery("CREATE INDEX ON :" + Nd + "(" + Param + ")","",db=db)
             #'PostToNeo4jServer(U, Q, "", CreateNodes:=False)
 
-def CypherBoltQuery(Q,database,ResultType="",header=1,db="azure",delimiter=","):
+def CypherBoltQuery(Q,database="omop",ResultType="",header=1,db="azure",delimiter=","):
     #Neo4j cypher query function
     driver = None
     if db=="azure":
