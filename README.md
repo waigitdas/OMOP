@@ -7,6 +7,10 @@ Relational databases have limitations. This repository contains assets that supp
 
 A sample Neo4j database is available at ______________. It runs on the Azure Cloud.
 
+DATA SOURCE
+
+The data used to develop this code is available at https://drive.google.com/file/d/18EjMxyA6NsqBo9eed_Gab1ESHWPxJygz/view. 
+
 CONTENTS OF THE REPOSITORY
 
 Python code is utilized to parse OMOP files and upload them to a Microsoft SQL Server database. It then queries this database, transforms the results to csv files, and imports the csv into Neo4j.  
