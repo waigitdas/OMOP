@@ -1,10 +1,18 @@
-##################################################################
-####  Graphs in Genealogy Code  ##################################
-####  David A Stumpf, MD, PhD; Woodsock, IL, USA #################
-####  copyright 2020 #############################################
-##################################################################
-from neo4j.v1 import GraphDatabase
-from py2neo import Graph, Path, Node, Relationship  
+#######################################################################################
+#######################################################################################
+##  Code initiated by David A Stumpf, MD, PhD #########################################
+##  Professor Emeritus, Northwestern University Feinberg School of Medicine ###########
+##  consulting@woodstockHIT.com #######################################################
+##  Provisioned via https://github.com/waigitdas/OMOP for the OMOP/OHDSI communities ##
+##  Copyright 2020 to protect from unauthorized use ###################################
+#######################################################################################
+#######################################################################################
+
+
+
+
+from neo4j import GraphDatabase
+from py2neo import Graph, Path, Node, Relationship
 from pandas import DataFrame
 import re
 import timer
@@ -17,12 +25,12 @@ from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 ########### Neo4j reference parameters ###########################
 ##################################################################
 ImportDir="C:\\Neo4j\\neo4jDatabases\\database-2389e81d-dcf8-4732-a655-b3d81ed879ec\\installation-3.5.17\\import\\"  #ontology
-#ImportDir="C:\\Neo4j\\neo4jDatabases\\database-b74bb205-66fd-41a7-8cf3-be9ec73dea0c\\installation-3.5.7\\import\\"  #clinical 
+#ImportDir="C:\\Neo4j\\neo4jDatabases\\database-b74bb205-66fd-41a7-8cf3-be9ec73dea0c\\installation-3.5.7\\import\\"  #clinical
 Neo4jTime=0
 
 
 #FileDir=
-#FileDir="C:\\Genealogy\\DNA\Haplotrees\\Neo4j Project\\Inputs\\R-Respository\\"   #"F:\\BigY\\"  #"H:\\BigYFiles\\"  
+#FileDir="C:\\Genealogy\\DNA\Haplotrees\\Neo4j Project\\Inputs\\R-Respository\\"   #"F:\\BigY\\"  #"H:\\BigYFiles\\"
 #importDir="C:\\Users\\david\\.Neo4jDesktop\\neo4jDatabases\\database-e3bafe4f-ee69-451e-8327-589f9069e1bd\\installation-3.3.4\\import"
 LineFeed=chr(10)
 ##################################################################
@@ -49,31 +57,36 @@ def CreateIndex(Nd,Param,db="azure"):
       CypherBoltQuery("CREATE INDEX ON :" + Nd + "(" + Param + ")","",db=db)
             #'PostToNeo4jServer(U, Q, "", CreateNodes:=False)
 
-def CypherBoltQuery(Q,ResultType,header=1,db="azure"):
+def CypherBoltQuery(Q,database,ResultType="",header=1,db="azure",delimiter=","):
     #Neo4j cypher query function
     driver = None
     if db=="azure":
-        driver=GraphDatabase.driver(AzureLib.Neo4Server, auth=(AzureLib.Neo4UserName,AzureLib.Neo4Pswd))
+        #print(database)
+        driver=GraphDatabase.driver(AzureLib.Neo4Server, auth=(Neo4UserName,Neo4Pswd),database=database )  #"neo4j"))  #AzureLib.Neo4Pswd))
+        #print("\n" + Q + "\n")
+
     else:  #local Neo4j database
         driver=GraphDatabase.driver("bolt://localhost:7687",auth=("neo4j","cns105"))
-  
-    with driver.session() as session:
+
+
+    QS=chr(34)
+
+    with driver.session(database=database) as session:
         s=""
         QQ=""
         i=0
-        QS=chr(34)
-        tm=time.time() 
+        #tm=time.time()
         with session.begin_transaction() as tx:
             for record in tx.run(Q):
                 if i==0 and header==1 and ResultType!="json":
                     c=0
                     while c<=len(record.keys())-1:
                         s = s + QQ + record.keys()[c] + QQ
-                        if c < len(record.keys())-1: s=s + ","
+                        if c < len(record.keys())-1: s=s + delimiter
                         c=c+1
                     s= s + "\n"
                     i=i+1
- 
+
                 if ResultType=='node':
                     #nothing yet
                     x=y
@@ -81,14 +94,14 @@ def CypherBoltQuery(Q,ResultType,header=1,db="azure"):
                     #nothing yet
                     x=y
                 elif ResultType=='GEDCOM':
-                    x=y 
+                    x=y
                 elif ResultType=="list":
                     return record
                 elif ResultType=="csv":
                     for j in range(0,len(record)):
-                        if type(record.values(j)[0]) is int: 
+                        if type(record.values(j)[0]) is int:
                             s = s + str(record.values(j)[0])
-                        elif type(record.values(j)[0]) is float: 
+                        elif type(record.values(j)[0]) is float:
                             s = s + str(record.values(j)[0])
                         elif type(record.values(j)[0]) is str:
                             s = s + QQ + record.values(j)[0] + QQ
@@ -98,20 +111,20 @@ def CypherBoltQuery(Q,ResultType,header=1,db="azure"):
                             k=0
                             while k<len(record.values(j)[0]):
                                 s= s + str(record.values(j)[0][k])
-                                if k<len(record.values(j)[0])-1:    
+                                if k<len(record.values(j)[0])-1:
                                     s = s + ";"
                                 k=k+1
                         else:
                             #print("Record type not supported: " + str(type(record.values(j)[0]))+ ": " + record.values(j)[0])
-                            s = s + str(record.values(j)[0]) 
-                        if j < len(record)-1: s=s + ","
-                        
+                            s = s + str(record.values(j)[0])
+                        if j < len(record)-1: s=s + delimiter
+
                     s = s + "\n"
                 elif ResultType=="fixcsv":
                     for j in range(0,len(record)):
-                        if type(record.values(j)[0])is int: 
+                        if type(record.values(j)[0])is int:
                             s = s + str(record.values(j)[0]);
-                        if type(record.values(j)[0])is float: 
+                        if type(record.values(j)[0])is float:
                             s = s + str(record.values(j)[0]);
                         elif type(record.values(j)[0]) is str:
                             s = s + record.values(j)[0]
@@ -119,57 +132,57 @@ def CypherBoltQuery(Q,ResultType,header=1,db="azure"):
                             k=0
                             while k<len(record.values(j)[0]):
                                 s= s + str(record.values(j)[0][k]).replace("%%%","\n")
-                                if k<len(record.values(j)[0])-1:    
+                                if k<len(record.values(j)[0])-1:
                                     s = s + ";"
                                 k=k+1
                         else:
-                            s = s + str(record.values(j)[0]) 
-                        if j < len(record)-1: s=s + ","
+                            s = s + str(record.values(j)[0])
+                        if j < len(record)-1: s=s + delimiter
                         #j=j+1
-                        
+
                     s = s + "\n"
                 elif ResultType=='json': #NOT WORKING YET ... close
                     s = s + "{\n"  #start of record
                     for j in range(0,len(record)):
-                                                      
+
                         if j<len(record):
-                          
-                            if type(record.values(j)[0])is int: 
+
+                            if type(record.values(j)[0])is int:
                                 s=s + QS + record.keys()[j] + QS + ": " + QS + record.value(j) + QS ;
-                                if j<len(record): s= s+ ",\n" 
+                                if j<len(record): s= s+ ",\n"
                                 else: s=s+"\n"
-                            if type(record.values(j)[0])is float: 
+                            if type(record.values(j)[0])is float:
                                 s=s + QS + record.keys()[j] + QS + ": " + QS + record.value(j) + QS
-                                if j<len(record): s= s+ ",\n" 
+                                if j<len(record): s= s+ ",\n"
                                 else: s=s+"\n"
-                                    
+
                             elif type(record.values(j)[0]) is str:
                                 s=s + QS + record.keys()[j] + QS + ": " + QS + record.value(j) + QS
-                                if j<len(record): s= s+ ",\n" 
+                                if j<len(record): s= s+ ",\n"
                                 else: s=s+"\n"
-                                    
+
                             elif type(record.values(j)[0]) is list:
                                 k=0
                                 s=s + QS + record.keys()[j] + QS + ": " + "[\n"
                                 while k<len(record.values(j)[0]):
                                     s=s + "{" + QS + record.keys()[j][0:3] + QS + ": " + QS + record.value(j)[k] + QS #+ "\n"
                                     #s= s + str(record.values(j)[0][k][0:3]).replace("%%%","\n")
-                                    if k<len(record.values(j)[0])-1:    
+                                    if k<len(record.values(j)[0])-1:
                                         s = s + "},\n"
                                     else: s= s + "}\n"
                                     k=k+1
                                 s=s + "]\n"
-                                
+
                             else:
-                                s = s + str(record.values(j)[0]) 
-                                #if j<len(record): s= s+ "," 
+                                s = s + str(record.values(j)[0])
+                                #if j<len(record): s= s+ ","
                                 #else: s=s+"}"
                     s = s + "}\n"
 
                 elif ResultType=='text':
                     while i <len(record):
                         s = s + record.value(i)  #is integer?
-                            
+
                         if i<len(record)-1:
                             s=s + chr(9)
                         i=i+1
@@ -180,8 +193,8 @@ def CypherBoltQuery(Q,ResultType,header=1,db="azure"):
                     x=''
                     return ""
             #print(s)
-            timer.Neo4jTime=timer.Neo4jTime + (time.time() - tm)
-            timer.Neo4jQueryCt  = timer.Neo4jQueryCt + 1
+            #Neo4jTime=Neo4jTime + (time.time() - tm)
+            #Neo4jQueryCt  = Neo4jQueryCt + 1
             return s  #s.replace('[','').replace(']','')
 
 
@@ -190,7 +203,7 @@ def CypherBoltQueryJson(Q):  #not mature
     with driver.session() as session:
         s=session.run(Q)
         return s
-   
+
 
 def UploadWithPeriodicCommit(Q,db=""):
     try:
@@ -214,22 +227,22 @@ def CypherBoltQueryWriteResultDirectlyToCSVSavedFile(Q,FN):  #not mature
     with driver.session() as session:
         #s=""
         i=0
-        
+
         with session.begin_transaction() as tx:
             for record in tx.run(Q):
                 if i==0:
                     c=0
                     while c<=len(record.keys())-1:
-                        f.write(record.keys()[c]) 
+                        f.write(record.keys()[c])
                         if c < len(record.keys())-1: f.write(",")
                         c=c+1
                     f.write("\n")
                     i=i+1
- 
+
                 for j in range(0,len(record)):
-                    if type(record.values(j)[0])is int: 
+                    if type(record.values(j)[0])is int:
                         f.write(str(record.values(j)[0]))
-                    if type(record.values(j)[0])is float: 
+                    if type(record.values(j)[0])is float:
                         f.write(str(record.values(j)[0]))
                     elif type(record.values(j)[0]) is str:
                         f.write(record.values(j)[0])
@@ -237,13 +250,13 @@ def CypherBoltQueryWriteResultDirectlyToCSVSavedFile(Q,FN):  #not mature
                         k=0
                         while k<len(record.values(j)[0]):
                             f.write(str(record.values(j)[0][k]))
-                            if k<len(record.values(j)[0])-1:    
+                            if k<len(record.values(j)[0])-1:
                                 f.write(";")
                             k=k+1
                     else:
-                        s = s + str(record.values(j)[0]) 
+                        s = s + str(record.values(j)[0])
                     if j < len(record)-1: s=s + ","
-                        
+
                 s = s + "\n"
         #print(s)
         #return s  #s.replace('[','').replace(']','')
@@ -260,7 +273,7 @@ def RecordTypeProcess(v):
             if type(v[i]) is int:
                 s = s + chr(34) + str(v[i]) + chr(34)
             else:
-                s = s + v[i] 
+                s = s + v[i]
             if i < len(v)-1: s = s + ', '
             i = i + 1
         return chr(34) + s + chr(34)
@@ -277,18 +290,18 @@ def CSVList(Items):
     i=0
     while i< len(ss):
         sss=ss[i].split(":")
-        s= s + sss[0] + ":" 
+        s= s + sss[0] + ":"
         if sss[1]=="S":
             s = s + "toString("
         elif sss[1]=="I":
             s = s + "toInteger("
         elif sss[1]=="F":
             s = s + "toFloat("
-        
+
         s = s + 'line.' + sss[0] + ')'
         i=i+1
         if i<len(ss): s = s + ', '
-       
+
 
     s=s + "}"
     return s
@@ -310,12 +323,12 @@ def IsKitInNeo4jDB(Kit):
         return False
     else:
         return True
-     
+
 def FixNone(S):
     Q=chr(34)
     if S is None:
-        return Q + Q 
-    else: return Q + S.replace(Q,"'") + Q  # re.sub('[^A-Za-z0-9 ]+', '',S) 
+        return Q + Q
+    else: return Q + S.replace(Q,"'") + Q  # re.sub('[^A-Za-z0-9 ]+', '',S)
 
 def PreSignAdd(Q,FN):   #AWS method
    s3 = boto3.client('s3', aws_access_key_id=AWS.AWSAccessKey,aws_secret_access_key=AWS.AWSSecretKey)
@@ -327,9 +340,9 @@ def PreSignAdd(Q,FN):   #AWS method
 
 def Neo4jCVSLoadFromSQLCursorForNodes(label,fn, cur):
     #cur is a tuple of turples
-    cq="USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM 'file:///" + fn + ".csv' as line FIELDTERMINATOR '|' " 
+    cq="USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM 'file:///" + fn + ".csv' as line FIELDTERMINATOR '|' "
 
-    cq = cq + "create (n:" + label + "{" 
+    cq = cq + "create (n:" + label + "{"
 
     for i in range (0,len(cur)):
         cq = cq  + cur[i][0] + ":" + GetTypeTo(cur[i][1]) + "line." + cur[i][0]  +")"
@@ -340,7 +353,7 @@ def Neo4jCVSLoadFromSQLCursorForNodes(label,fn, cur):
 
 def Neo4jCVSLoadFromSQLCursor(label,fn,cypher, cur):
     #cur is a tuple of turples
-    cq="LOAD CSV  WITH HEADERS from 'file:///" + fn + ".csv' delimiter:'|' " 
+    cq="LOAD CSV  WITH HEADERS from 'file:///" + fn + ".csv' delimiter:'|' "
     c=cypher.split("{")
 
     for i in range(1,len(c),2 ):
@@ -353,7 +366,7 @@ def Neo4jCVSLoadFromSQLCursor(label,fn,cypher, cur):
     print(cq)
 
 def GetTypeTo(t):
-    x=""    
+    x=""
     if t is int:
         x="toInteger("
     elif t is str: x="toString("

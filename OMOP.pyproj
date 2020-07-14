@@ -21,6 +21,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AzureLib.py" />
     <Compile Include="Neo4jLib.py" />
     <Compile Include="OMOPLib.py">
       <SubType>Code</SubType>

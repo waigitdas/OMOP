@@ -1,3 +1,13 @@
+#######################################################################################
+#######################################################################################
+##  Code initiated by David A Stumpf, MD, PhD #########################################
+##  Professor Emeritus, Northwestern University Feinberg School of Medicine ###########
+##  consulting@woodstockHIT.com #######################################################
+##  Provisioned via https://github.com/waigitdas/OMOP for the OMOP/OHDSI communities ##
+##  Copyright 2020 to protect from unauthorized use ###################################
+#######################################################################################
+#######################################################################################
+
 import pyodbc 
 import csv
 import ast

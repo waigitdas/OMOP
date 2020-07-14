@@ -1,0 +1,45 @@
+CREATE INDEX idx_Vocabulary_id ON concept (vocabulary_id)
+CREATE INDEX idx_concept_code ON concept (concept_code)
+CREATE INDEX idx_code_lookup ON concept (vocabulary_id,concept_code)
+CREATE INDEX idx_concept_id ON concept (concept_id)
+
+CREATE INDEX idx_condition_occurrence_id ON condition_occurrence (condition_occurrence_id)
+CREATE INDEX idx_condition_concept_id ON condition_occurrence (condition_concept_id)
+CREATE INDEX idx_condition_occurence_person_id ON condition_occurrence (person_id)
+CREATE INDEX idx_condition_occurence_provider_id ON condition_occurrence (provider_id)
+
+CREATE INDEX idx_person_id ON person (person_id)
+
+CREATE INDEX idx_provider_id ON provider (provider_id)
+CREATE INDEX idx_provider_NPI ON provider (NPI)
+CREATE INDEX idx_provider_specialty_concept_id ON provider (specialty_concept_id)
+
+
+CREATE INDEX idx_observation_id ON observation (observation_id)
+CREATE INDEX idx_observation_person_id ON observation (person_id)
+CREATE INDEX idx_observation_provider_id ON observation (provider_id)
+CREATE INDEX idx_observation_visit_occurrence_id ON observation (visit_occurrence_id)
+CREATE INDEX idx_observation_type_concept_id ON observation (observation_type_concept_id)
+
+CREATE INDEX idx_visit_occurrene_id ON visit_occurrence (visit_occurrence_id)
+CREATE INDEX idx_visit_occurrene_person_id ON visit_occurrence (person_id)
+CREATE INDEX idx_visit_occurrene_provider_id ON visit_occurrence (provider_id)
+CREATE INDEX idx_visit_occurrene_care_site_id ON visit_occurrence (care_site_id)
+CREATE INDEX idx_visit_occurrene_preceding_visit_occurrence_id ON visit_occurrence (preceding_visit_occurrence_id)
+CREATE INDEX idx_visit_occurrene_visit_type_concept_id ON visit_occurrence (visit_type_concept_id)
+
+CREATE INDEX idx_observation_period_id ON observation_period (observation_period_id) 
+CREATE INDEX idx_observation_period_person_id ON observation_period (person_id) 
+CREATE INDEX idx_observation_period_start_date ON observation_period (observation_period_start_date) 
+
+CREATE INDEX idx_condition_occurrence_person_id ON condition_occurrence (person_id) 
+CREATE INDEX idx_condition_occurrence_provider_id ON condition_occurrence (provider_id) 
+CREATE INDEX idx_condition_occurrence_visit_occurrence_id ON condition_occurrence (visit_occurrence_id) 
+CREATE INDEX idx_condition_occurrence_condition_start_date ON condition_occurrence (condition_start_date) 
+CREATE INDEX idx_condition_occurrence_condition_concept_id ON condition_occurrence (condition_concept_id) 
+CREATE INDEX idx_condition_occurrence_condition_type_concept_id ON condition_occurrence (condition_type_concept_id) 
+CREATE INDEX idx_condition_occurrence_condition_source_concept_id ON condition_occurrence (condition_source_concept_id) 
+
+CREATE INDEX idx_concept_relationship_concept_id_1 ON concept_relationship (concept_id_1) 
+CREATE INDEX idx_concept_relationship_concept_id_2 ON concept_relationship (concept_id_2) 
+CREATE INDEX idx_concept_relationship_relationship_id ON concept_relationship (relationship_id) 
