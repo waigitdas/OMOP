@@ -16,7 +16,7 @@ from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 
 #one-time loading of neo4j from pre-processed CSV
 def OneTimeCode():
-
+    print("start")
     CypherBoltQuery("create (p:Person{person_id:1})")
     CypherBoltQuery("create (p:Provider{provider_id:1})")
     CypherBoltQuery("create (p:CareSite{care_site_id:1})")
@@ -34,7 +34,7 @@ def OneTimeCode():
     UploadWithPeriodicCommit(cq,"omop")
     print("Provider")
 
-    cq="USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM 'file:///omop/CareSite.csv' as line FIELDTERMINATOR '|' create (p:CareSite{care_site_id:toInteger(line.care_site_id),care_site_type:toString(line.care_site_type)})"
+    cq="USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM 'file:///omop/CareSite.csv' as line FIELDTERMINATOR '|' create (#p:CareSite{care_site_id:toInteger(line.care_site_id),care_site_type:toString(line.care_site_type)})"
     UploadWithPeriodicCommit(cq,"omop")
     print("Care Site")
 
@@ -73,8 +73,9 @@ def OneTimeCode():
     UploadWithPeriodicCommit("USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM 'file:///omop/SharedPatients.csv' as line FIELDTERMINATOR '|' match (p1:Provider{provider_id:toInteger(line.p1)}) match (p2:Provider{provider_id:toInteger(line.p2)}) merge (p1)-[r:SharedPatients{SharedPatients:toInteger(line.SharedPatients)}]-(p2)")
     print("Shared Patients")
 
-    UploadWithPeriodicCommit("USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM 'file:///omop/VisitCondition.csv' as line FIELDTERMINATOR '|' match (v:Visit_Occurrence{visit_occurrence_id:toInteger(line.visit_occurrence_id)}) match (c:Condition{condition_concept_id:toInteger(line.condition_concept_id)}) merge (v)-[r:VisitCondition]->(c)")
-    print("Visit Condition\nFinisher")
+    cq="USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM 'file:///omop/VisitCondition.csv' as line FIELDTERMINATOR '|' match (v:VisitOccurrence{visit_occurrence_id:toInteger(line.visit_occurrence_id)}) match (c:Condition{condition_concept_id:toInteger(line.condition_concept_id)}) merge (v)-[r:VisitCondition{person_id:toInteger(line.person_id)}]->(c)"
+    UploadWithPeriodicCommit(cq,"omop")
+    print("Visit Condition\nFinished")
 
 
 def CreateIndex(Nd,Param,db="azure"):
@@ -109,7 +110,7 @@ def CypherBoltQuery(Q,ResultType="",header=1,db="azure",database="omop",delimite
     driver = None
     if db=="azure":
         #print(database)
-        driver=GraphDatabase.driver("bolt://104.43.228.191:7687", auth=("neo4j","WHIT!2020das"),database="omop" )  #"neo4j"))  #AzureLib.Neo4Pswd))
+        driver=GraphDatabase.driver("bolt://40.113.233.50:7687", auth=("neo4j","WHIT!2020das"),database="omop" )  #"neo4j"))  #AzureLib.Neo4Pswd))
         #print("\n" + Q + "\n")
 
     else:  #local Neo4j database
