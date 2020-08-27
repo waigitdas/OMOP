@@ -22,7 +22,7 @@ from bcp import DataFile
 
 def QueryExecute(Q,db="OMOP"):
     #executes query with no return. Used to bulk insert, etc.
-    conn = pyodbc.connect(driver='{SQL Server}', server='DAS2020\DAS2020',trusted_connection='yes', database=db)
+    conn = pyodbc.connect(driver='{SQL Server}', server='{your server}',trusted_connection='yes', database=db)
 
     try:
         cursor = conn.cursor()
@@ -42,7 +42,7 @@ def QueryExecute(Q,db="OMOP"):
 
 def Query(Q,db="OMOP"):
     #query returns csv file.
-    conn = pyodbc.connect(driver='{SQL Server}', server='DAS2020\DAS2020',trusted_connection='yes', database=db)
+    conn = pyodbc.connect(driver='{SQL Server}', server='{your server}',trusted_connection='yes', database=db)
 
     cursor = conn.cursor()
     cursor.execute(Q)
@@ -64,7 +64,7 @@ def QueryWriteCSV(Q,FN,delimiter="|"):
     #query returns csv file.
     fw=open(FN,"w")
     conn = pyodbc.connect('Driver={SQL Server};'
-                          'Server=DAS2020\DAS2020;'
+                          'Server={your server};'
                           'Database=OMOP;'
                           'Trusted_Connection=yes;')
 
@@ -94,7 +94,7 @@ def CreateNodeCSVLoadQuery():
 
 def CreatsNodeCSVLoadQueryString():
     conn = pyodbc.connect('Driver={SQL Server};'
-                          'Server=DAS2020\DAS2020;'
+                          'Server={your server};'
                           'Database=OMOP;'
                           'Trusted_Connection=yes;')
 
@@ -116,7 +116,7 @@ def CreatsNodeCSVLoadQueryString():
 def QueryToNeo4jNodes(NodeLabel,FN,SQLQuery):
     #query returns csv file.
     conn = pyodbc.connect('Driver={SQL Server};'
-                          'Server=DAS2020\DAS2020;'
+                          'Server={your server};'
                           'Database=OMOP;'
                           'Trusted_Connection=yes;')
 
@@ -152,7 +152,7 @@ def QueryToNeo4jNodes(NodeLabel,FN,SQLQuery):
 def QueryToNeo4jEdges(FN,SQLQuery,CypherLoadStatement):
     #query returns csv file.
     conn = pyodbc.connect('Driver={SQL Server};'
-                          'Server=DAS2020\DAS2020;'
+                          'Server={your server};'
                           'Database=OMOP;'
                           'Trusted_Connection=yes;')
 
@@ -181,21 +181,6 @@ def QueryToNeo4jEdges(FN,SQLQuery,CypherLoadStatement):
 
     nq="USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM 'file:///" + FN + ".csv' as line FIELDTERMINATOR '|' " + CypherLoadStatement
     Neo4jLib.UploadWithPeriodicCommit(nq)
-
-#def QueryRowProcess(row):
-#    s=""
-#    for i in range(0,len(row)):
-#        if type(row[i]) is int:
-#            q=""
-#            s= s + q + str(row[i]) + q
-#        else:
-#            q=chr(34)
-#            s= s + q + row[i] + q
-#        if i<len(row)-1:
-#                s=  s + ","
-#        #else: s = s + "\n"
-#    return s
-
 
 
 def LoadOMOPtoSQLServer():
@@ -243,16 +228,4 @@ def LoadSNOMEDtoSQLServer():
 def CreateSNOMEDSQLTable(TblNm,db="Med_Vocab_2020"):
     QueryExecute(Q="CREATE TABLE [dbo].[" + TblNm + "]( [id] [bigint] NULL, [effectiveTime] [bigint] NULL, [active] [int] NULL, [moduleId] [bigint] NULL, [conceptId] [bigint] NULL, [languageCode] [nchar](2) NULL, [typeID] [bigint] NULL, [term] [nchar](254) NULL, [caseSignificanceId] [bigint] NULL)",db=db)
 
-#def CreateBCPXML():   #TblNm, Server="DAS2019\DAS2018"):
-#    #conn = pyodbc.connect(driver='{SQL Server}', server='DAS2020\DAS2020',trusted_connection='yes', database='Med_Vocab_2020')
-#    #os.system("cmd /k bcp DAS2020\\DAS2020.Med_Vocab_2020.sct2_Description_Full_CanadianEdition_20200331  format nul  -T  -f 'c:\\temp\\xxx.xml' ") #'c:\\temp\\xxx.bcp'")
-#    os.system("cmd /k bcp DAS2020.Med_Vocab_2020.sct2_Description_Full_CanadianEdition_20200331 format  -c -t -f c:\\temp\Employee.fmt -T")
-#def BCPUpload(SQLTable,CSVtoUpload,delimiter=","):
-#    #https://bcp.readthedocs.io/en/latest/
-#    #https://pypi.org/project/bcp/
-#    conn=conn = bcp.Connection(host='DAS2020\DAS2020', driver='mssql')
-#    my_bcp = bcp.BCP(conn)
-#    my_file = bcp.DataFile(file_path=CSVtoUpload,delimiter=delimiter )
-#    my_bcp.load(input_file=my_file, table=SQLTable)
-#    #MSSQLLoad(my_bcp,my_file,SQLTable,batch_size=10000)
-#    x=0
+
